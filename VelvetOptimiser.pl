@@ -764,7 +764,7 @@ sub covCutoff{
     }
 	
 	my $a = $minCovCutoff;
-	my $b = 0.8 * $expCov;
+	my $b = $upperCovCutoff * $expCov;
 	my $t = 0.618;
 	my $c = $a + $t * ($b - $a);
 	my $d = $b + $t * ($a - $b);
