@@ -19,7 +19,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-#		Version 2.2.1
+#		Version 2.2.2
 
 #
 #   pragmas
@@ -76,7 +76,7 @@ my $opt_func;
 my $opt_func2;
 my $minCovCutoff;
 my $upperCovCutoff;
-my $OptVersion = "2.2.1";
+my $OptVersion = "2.2.2";
 my $threadfailed : shared = 0;
 my $finaldir;
 

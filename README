@@ -6,7 +6,7 @@ VelvetOptimiser
 VERSION
 =======
 
-Version 2.2.1
+Version 2.2.2
 
 LICENCE
 =======
@@ -79,6 +79,7 @@ COMMAND LINE
   --c|optFuncCov=s 	The optimisation function used for cov_cutoff optimisation. (default 'Lbp').
   --p|prefix=s    	The prefix for the output filenames, the default is the date and time in the format DD-MM-YYYY-HH-MM_. (default 'auto').
   --d|dir_final=s The name of the directory to put the final output into. (default '.')
+  --z|upperCovCutoff=f The maximum coverage cutoff to consider as a multiplier of the expected coverage. (default '0.8').
   
 
 Advanced!: Changing the optimisation function(s)
@@ -276,6 +277,13 @@ DETAILED OPTIONS
 	Default: . (the current directory)
 	
 	At the completion of the optimiser, any non default string will cause the final velvet output and the Velvet Optimiser logfile to be moved to the directory specified.  If the directory already exists, an error is generated and the optimiser stops.
+	
+-z or --upperCovCutoff
+
+	Parameter type required: float
+	Default: 0.8
+	
+	Uses this fraction of the expected coverage to set the upper limit of the coverage cutoff range to search for the optimum in.
 
 BUGS
 ====
@@ -347,6 +355,10 @@ Changes since Version 2.0:
 2.2.1
 
 *   Added an option to manually set a minimum coverage cutoff.
+
+2.2.2
+
+*	Added an option to set the maximum coverage cutoff as a fraction of the expected coverage.
 
 TO DO
 =====  
