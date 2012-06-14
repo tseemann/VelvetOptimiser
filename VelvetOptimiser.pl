@@ -402,7 +402,7 @@ sub setOptions {
 
 	@Options = (
 		{OPT=>"help",    VAR=>\&usage,             DESC=>"This help"},
-		{OPT=>"V|version!", VAR=>\$printVersion, DEFAULT=>0, DESC=>"Print version to stdout and exit."},
+		{OPT=>"version!", VAR=>\$printVersion, DEFAULT=>0, DESC=>"Print version to stdout and exit."},
 		{OPT=>"v|verbose+", VAR=>\$verbose, DEFAULT=>0, DESC=>"Verbose logging, includes all velvet output in the logfile."},
 		{OPT=>"s|hashs=i", VAR=>\$hashs, DEFAULT=>19, DESC=>"The starting (lower) hash value"}, 
 		{OPT=>"e|hashe=i", VAR=>\$hashe, DEFAULT=>$maxhash, DESC=>"The end (higher) hash value"},
