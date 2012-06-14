@@ -19,7 +19,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-#		Version 2.2.2
+my $OptVersion = "2.2.2";
 
 #
 #   pragmas
@@ -76,9 +76,9 @@ my $opt_func;
 my $opt_func2;
 my $minCovCutoff;
 my $upperCovCutoff;
-my $OptVersion = "2.2.2";
 my $threadfailed : shared = 0;
 my $finaldir;
+my $printVersion = 0;
 
 #
 #
@@ -87,11 +87,7 @@ my $finaldir;
 #
 print STDERR "
 ****************************************************
-
            VelvetOptimiser.pl Version $OptVersion
-
-            Simon Gladman - CSIRO 2009
-
 ****************************************************\n";
 
 my $currfreemem = VelvetOpt::Utils::free_mem;
@@ -406,6 +402,7 @@ sub setOptions {
 
 	@Options = (
 		{OPT=>"help",    VAR=>\&usage,             DESC=>"This help"},
+		{OPT=>"V|version!", VAR=>\$printVersion, DEFAULT=>0, DESC=>"Print version to stdout and exit."},
 		{OPT=>"v|verbose+", VAR=>\$verbose, DEFAULT=>0, DESC=>"Verbose logging, includes all velvet output in the logfile."},
 		{OPT=>"s|hashs=i", VAR=>\$hashs, DEFAULT=>19, DESC=>"The starting (lower) hash value"}, 
 		{OPT=>"e|hashe=i", VAR=>\$hashe, DEFAULT=>$maxhash, DESC=>"The end (higher) hash value"},
@@ -434,6 +431,11 @@ sub setOptions {
 		}
 	}
 	
+	if ($printVersion) {
+		print "VelvetOptimiser $OptVersion\n";
+		exit 0;
+        }
+
 	print STDERR strftime("%b %e %H:%M:%S", localtime), " Starting to check input parameters.\n";
 	
 	unless($readfile){

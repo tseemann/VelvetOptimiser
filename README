@@ -64,6 +64,7 @@ COMMAND LINE
   Options:
   
   --help          	This help.
+  --V|version!		Print version to stdout and exit.
   --v|verbose+    	Verbose logging, includes all velvet output in the logfile. (default '0').
   --s|hashs=i     	The starting (lower) hash value (default '19').
   --e|hashe=i     	The end (higher) hash value (default '31').
@@ -125,6 +126,12 @@ DETAILED OPTIONS
 -h or --help
 
 	Prints the commandline help to STDOUT.
+
+-V or --version
+
+	Prints the program name and version to STDOUT. Note that other information is still 
+	printed to STDERR. You can ignore this by redirecting the output like this:
+	% VelvetOptimiser.pl --version 2> /dev/null
 
 -v or --verbose
 
@@ -354,7 +361,7 @@ Changes since Version 2.0:
 
 2.2.1
 
-*   Added an option to manually set a minimum coverage cutoff.
+*	Added an option to manually set a minimum coverage cutoff.
 
 2.2.2
 
@@ -368,7 +375,4 @@ CONTACT
 =======
 
 Simon Gladman <simon.gladman@csiro.au>
-
-
-
 
