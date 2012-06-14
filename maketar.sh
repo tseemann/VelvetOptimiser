@@ -24,7 +24,7 @@ fi
 
 echo "Copying files..."
 mkdir $TARDIR
-cp -v -r VelvetOptimiser.pl LICENSE README VelvetOpt $TARDIR
+cp -v -r VelvetOptimiser.pl LICENSE README INSTALL CHANGELOG VelvetOpt $TARDIR
 cd $DEST
 
 echo "Tarring..."
