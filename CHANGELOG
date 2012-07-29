@@ -74,3 +74,7 @@ Changes since Version 2.0:
 *	Added LICENSE
 *	Added INSTALL
 *	Moved the change log from README to its own file CHANGELOG
+
+2.2.4
+
+*	Fixed a bug when the starting and ending hash values were the same.

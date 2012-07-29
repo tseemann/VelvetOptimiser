@@ -14,7 +14,7 @@ Download the latest .tar.gz file from the website:
 
 For example: 
 
-    VelvetOptimiser-2.2.2.tar.gz 
+    VelvetOptimiser-2.2.4.tar.gz 
 
 
 
@@ -26,9 +26,9 @@ Choose a place to put the software - it comes in it's own directory.
 Here we install it as a normal user in our $HOME directory (eg. /home/peter)
 
     % cd $HOME
-    % sudo tar zxvf /path/to/VelvetOptimiser-2.2.2.tar.gz 
+    % sudo tar zxvf /path/to/VelvetOptimiser-2.2.4.tar.gz 
 
-You now have it in a folder called $HOME/VelvetOptimiser-2.2.2
+You now have it in a folder called $HOME/VelvetOptimiser-2.2.4
 
 
 
@@ -37,7 +37,7 @@ You now have it in a folder called $HOME/VelvetOptimiser-2.2.2
 
 Add the following to your $HOME/.bashrc file
 
-    export PATH=$PATH:$HOME/VelvetOptimiser-2.2.2
+    export PATH=$PATH:$HOME/VelvetOptimiser-2.2.4
 
 You will have to log out and log back in for this to be incorporated.
 
@@ -52,7 +52,7 @@ Type:
 You should see the command line help. For detailed instructions read the
 README file:
 
-    % less $HOME/VelvetOptimiser-2.2.2/README
+    % less $HOME/VelvetOptimiser-2.2.4/README
 
 
 

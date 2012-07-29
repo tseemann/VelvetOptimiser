@@ -19,7 +19,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-my $OptVersion = "2.2.2";
+my $OptVersion = "2.2.4";
 
 #
 #   pragmas
@@ -160,8 +160,10 @@ if($amos){
 
 #build the hashval array - steps too...
 for(my $i = $hashs; $i <= $hashe; $i += $hashstep){
+	print STDERR "i is $i\n";
     push @hashvals, $i;
 }
+
 #check for $hashe in array..
 my $max = $hashvals[$#hashvals];
 if($max < $hashe){
@@ -457,15 +459,14 @@ sub setOptions {
 		$hashstep --;
 		print STDERR "\tHash search step value was odd, substracting one.  New hash step value = $hashstep\n";
 	}
-	if($hashstep < 2){
-		$hashstep = 2;
-		print STDERR "\tHash step set below minimum of 2.  New hash step value = 2\n";
-	}
 	if($hashstep > ($hashe - $hashs)){
 		$hashstep = $hashe - $hashs;
 		print STDERR "\tHash search step value was higher than start to end range.  Setting hash step to range. New hash step value = $hashstep\n";
 	}
-		
+	if($hashstep < 2){
+		$hashstep = 2;
+		print STDERR "\tHash step set below minimum of 2.  New hash step value = 2\n";
+	}	
 	if($hashe > $maxhash || $hashe < 1){
         print STDERR "\tEnd hash value not in workable range.  New end hash value is $maxhash.\n";
         $hashe = $maxhash;
