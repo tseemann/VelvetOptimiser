@@ -41,6 +41,7 @@ use VelvetOpt::Utils;
 use Data::Dumper;
 use Storable qw (freeze thaw);
 use Getopt::Long;
+use File::Path qw(remove_tree);
 
 
 #
@@ -379,7 +380,7 @@ else {
 foreach my $key(keys %assemblies){
 	unless($key == $bestId){ 
 		my $dir = $assembliesObjs{$key}->{ass_dir};
-		system('rm', '-r', '--preserve-root', $dir);
+		remove_tree($dir, {safe => 1});
 	} 
 }
 unless ($finaldir eq "."){
