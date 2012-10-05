@@ -133,8 +133,13 @@ use POSIX qw(strftime);
 
 my $interested = 0;
 
-my @Fileformats;
-my @Readtypes;
+my $cats;
+my $maxkmerlength;
+my %Fileformats;
+my %Readtypes;
+my %Otheroptions;
+my %Filelayouts;
+
 my $usage;
 my $inited = 0;
 
@@ -142,47 +147,65 @@ sub init {
 	#run a velveth to get its help lines..
 	my $response = &_runVelveth(" ");
 	
+	#get the categories
 	$response =~ m/CATEGORIES = (\d+)/;
-	my $cats = $1;
+	$cats = $1;
 	unless($cats){$cats = 2;}
 	
-	$response =~ m/(File format options:(.*)Read type options)/s;
-	my @t = split /\n/, $1;
-	foreach(@t){
-		#if(/\s+(-\S+)/){
-		while(/\s+(-\S+)/g){
-			push @Fileformats, $1;
-		}
-	}
+	#get the maxkmerlength
+	$response =~ m/MAXKMERLENGTH = (\d+)/;
+	$maxkmerlength = $1;
 	
+	#get the file format options
+	$response =~ m/(File format options:(.*)\(Note:)/s;
+	splitVHOptions($1, \%Fileformats);
+	
+	#get the file layouts
+	unless($response =~ m/File layout options for paired reads.*:\n(.*)Read type options:/s){ warn "No match for file layout options\n$!";}
+	splitVHOptions($1, \%Filelayouts);
+	
+	#get the read type options
 	$response =~ m/(Read type options:(.*)Options:)/s;
+	splitVHOptions($1, \%Readtypes);
 	
-	@t = ();
-	@t = split /\n/, $1;
-	foreach(@t){
-		#if(/\s+(-\S+)/){
-		while(/\s+(-\S+)/g){
-			push @Readtypes, $1;
-		}
+	#get the other options
+	$response =~ m/\nOptions:(.*)Synopsis:/s;
+	splitVHOptions($1, \%Otheroptions);
+	
+	#make up the standard usage for velveth parameter strings...
+	$usage = "Incorrect velveth parameter string: Needs to be of the form\n{[-file_layout][-file_format][-read_type] filename} or {-other_option}\n";
+	$usage .= "Where:\nFile layout options (for paired end reads):\n";
+	foreach my $key(sort keys %Filelayouts){
+		$usage .= "\t$key\n";
 	}
-	
-	for(my $i = 3; $i <= $cats; $i++){
-		push @Readtypes, "-short$i";
-		push @Readtypes, "-shortPaired$i";
-	}
-	
-	$usage = "Incorrect velveth parameter string: Needs to be of the form\n{[-file_format][-read_type] filename}\n";
-	$usage .= "Where:\n\tFile format options:\n";
-	foreach(@Fileformats){
-		$usage .= "\t$_\n";
+	$usage .= "File format options:";
+	foreach my $key (sort keys %Fileformats){
+		$usage .= "\t$key\n";
 	}
 	$usage .= "Read type options:\n";
-	foreach(@Readtypes){
-		$usage .= "\t$_\n";
+	foreach my $key (sort keys %Readtypes){
+		$usage .= "\t$key\n";
+	}
+	$usage .= "Other options:\n";
+	foreach my $key (sort keys %Otheroptions){
+		$usage .= "\t$key\n";
 	}
 	$usage .= "\nThere can be more than one filename specified as long as its a different type.\nStopping run\n";
 	
+	#set inited to 1
 	$inited = 1;
+}
+
+sub splitVHOptions {
+	my $section = shift;
+	my $opts = shift;
+	my @t = split /\n/, $section;
+	foreach(@t){
+		#if(/\s+(-\S+)/){
+		while(/\s+(-\S+)/g){
+			$opts->{$1} = 1;
+		}
+	}
 }
 
 sub _runVelveth {
@@ -197,105 +220,120 @@ sub _runVelveth {
 
 sub _checkVHString {
     unless($inited){ &init(); }
+	print STDERR $usage if $interested;
 	my $line = shift;
-	my $cats = shift;
+	my $useless = shift;
+	
+	print STDERR "\tIN checkVHString: About to test $line\n" if $interested;
+	
+	my $ok = 1;
+	
+	#first remove all "other" options.
+	foreach(keys %Otheroptions){
+		$line =~ s/$_//;
+	}
+	
+	#get each m/-options+ filename+/ block
+	my @blocks;
+	while ($line =~ m/((-\S+\s+)+[\w\/\\\. ]+)/g) {
+		my $text = $1;
+		$text =~ s/\s+$//;
+		push @blocks, $text;
+	}
+	
+	#look at each block in turn
+	foreach my $block(@blocks) {
+		my $blockgood = 1;
+		my $numfiles = 0;
+		my $formatused = 0;
+		my $layoutused = 0;
+		my $readused = 0;
+		my $separate = 0;
+		my $paired = 0;
+		my @files_to_check;
+		
+		print STDERR "\tIN checkVHString: Block being checked: $block\n" if $interested;
+		
+		my @t = split /\s+/, $block;
+		
+		#look at each part of the block
+		foreach my $x(@t){
+			#check if its an option, otherwise its a filename...
+			unless($x =~ m/^-/){
+				push @files_to_check, $x; 
+				$numfiles ++;
+				next;
+			}
+			#make sure its a valid option.
+			#check file formats first
+			if($Fileformats{$x}){
+				$formatused ++;
+			}
+			elsif($Filelayouts{$x}){
+				$layoutused ++;
+			}
+			elsif($Readtypes{$x}){
+				$readused ++;
+				$paired ++ if $x =~ m/Paired/;
+			}
+			else {
+				$blockgood = 0;
+				if($x =~ m/(\d+)$/){
+					carp "*** Category number $1 in $x higher than that velvet compiled with ($cats)\n";
+				}
+				else {
+					carp "*** Unknown option used: $x in file block: $block\n";
+				}
+				
+			}
+			if($x eq "-separate"){
+				$separate = 1;
+			}
+		}
+		
+		#make sure only 1 filetype, format and readtype is used in each block
+		if($formatused > 1){
+			carp "*** Too many file formats used in block: $block\n";
+			$blockgood = 0;
+		}
+		if($layoutused > 1){
+			carp "*** Too many file layouts used in block: $block\n";
+			$blockgood = 0;
+		}
+		if($readused > 1){
+			carp "*** Too many read type specifications used in block: $block\n";
+			$blockgood = 0;
+		}
+		
+		#check appropriate number of files if separate..
+		if($separate && $numfiles != 2){
+			carp "*** $numfiles files specified for -separate option in block: $block. Require exactly 2.\n";
+			$blockgood = 0;
+		}
+		
+		#check if paired read type option was chosen...
+		if($separate && !$paired){
+			carp "*** -separate chosen without valid Paired read type specified in block: $block. Need to specify either -shortPaired or -longPaired\n";
+			$blockgood = 0;
+		}
+		
+		#make sure files are readable..
+		foreach my $file(@files_to_check){
+			unless(-r $file){
+				$blockgood = 0;
+				carp "*** File $file doesn't exist or is unreadable.\n";
+			}
+		}
+		unless($blockgood){ print STDERR "Block $block FAILED!\n"}
+		
+		#if block is no good then whole thing is no good...
+		$ok = $blockgood;
+	}
+	
+	return $ok;
 	
 	
 	
-	my %fileform = ();
-    my %readform = ();
-	
-	foreach(@Fileformats){ $fileform{$_} = 1;}
-    foreach(@Readtypes){ $readform{$_} = 1;}
-
-    my @l = split /\s+/, $line;
-
-    #first check for a directory name as the first parameter...
-    my $dir = shift @l;
-    if(!($dir =~ /\w+/) || ($dir =~ /^\-/)){
-        carp "**** $line\n\tNo directory name specified as first parameter in velveth string. Internal error!\n$usage";
-        return 0;
-    }
-    #print "VH Check passed directory..\n";
-    my $hash = shift @l;
-    unless($hash =~ /^\d+$/){
-        carp "**** $line\n\tHash value in velveth string not a number. Internal error!\n$usage";
-        return 0;
-    }
-
-    #print "VH check passed hash value..\n";
-
-    my $i = 0;
-    my $ok = 1;
-    foreach(@l){
-        if(/^-/){
-            #s/-//;
-            if(!$fileform{$_} && !$readform{$_}){
-                carp "**** $line\n\tIncorrect fileformat or readformat specified.\n\t$_ is an invalid velveth switch.\n$usage";
-                return 0;
-            }
-            elsif($fileform{$_}){
-                if(($i + 1) > $#l){
-                    carp "$line\n\tNo filename supplied after file format type $l[$i].\n$usage";
-                    return 0;
-                }
-                if($readform{$l[$i+1]}){
-                    if(($i+2) > $#l){
-                        carp "$line\n\tNo filename supplied after read format type $l[$i+1].\n$usage";
-                        return 0;
-                    }
-                    if(-e $l[$i+2]){
-                        $ok = 1;
-                    }
-                    else{
-                        carp "**** $line\n\tVelveth filename " . $l[$i+2] . " doesn't exist.\n$usage";
-                        return 0;
-                    }
-                }
-                elsif (-e $l[$i+1]){
-                    $ok = 1;
-                }
-                else {
-                   carp "**** $line\n\tVelveth filename " . $l[$i+1] . " doesn't exist.$usage\n";
-                    return 0;
-                }
-            }
-            elsif($readform{$_}){
-                if(($i + 1) > $#l){
-                    carp "$line\n\tNo filename supplied after read format type $l[$i].\n$usage";
-                    return 0;
-                }
-                if($fileform{$l[$i+1]}){
-                    if(($i+2) > $#l){
-                        carp "$line\n\tNo filename supplied after file format type $l[$i+1].\n$usage";
-                        return 0;
-                    }
-                    if(-e $l[$i+2]){
-                        $ok = 1;
-                    }
-                    else{
-                        carp "**** $line\n\tVelveth filename " . $l[$i+2] . " doesn't exist.\n$usage";
-                        return 0;
-                    }
-                }
-                elsif (-e $l[$i+1]){
-                    $ok = 1;
-                }
-                else {
-                    carp "**** $line\n\tVelveth filename " . $l[$i+1] ." doesn't exist.\n$usage";
-                    return 0;
-                }
-            }
-        }
-        elsif(!-e $_){
-            carp "**** $line\n\tVelveth filename $_ doesn't exist.\n$usage";
-            return 0;
-        }
-        $i ++;
-    }
-    if($ok){
-        return 1;
-    }
 }
 
 sub objectVelveth {

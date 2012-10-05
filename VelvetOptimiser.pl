@@ -160,7 +160,7 @@ if($amos){
 
 #build the hashval array - steps too...
 for(my $i = $hashs; $i <= $hashe; $i += $hashstep){
-	print STDERR "i is $i\n";
+	#print STDERR "i is $i\n";
     push @hashvals, $i;
 }
 
@@ -208,12 +208,13 @@ print $OUT strftime("%b %e %H:%M:%S", localtime), "\n\n\tBeginning velveth runs.
 #now run velveth for all the hashvalues in a certain number of threads..
 my @threads;
 foreach my $hashval (@hashvals){
+	#print STDERR "Hashval = $hashval Numthreads = $num_threads currentThreads = $current_threads\n";
 	while($current_threads >= $num_threads){
 		sleep(2);
 	}
 	if($threadfailed){
 		for my $thr (threads->list) {
-			#print STDERR "Waiting for thread ",$thr->tid," to complete.\n";
+			print STDERR "Waiting for thread ",$thr->tid," to complete.\n";
 			$thr->join;
 		}
 		die "Velveth failed to run! Must be a problem with file types, check by running velveth manually or by using -v option and reading the log file.\n";
@@ -399,7 +400,7 @@ unless ($finaldir eq "."){
 sub setOptions {
 	use Getopt::Long;
 	my $num_cpus = VelvetOpt::Utils::num_cpu;
-	my $thmax = int($num_cpus/$thread_per_job);
+	my $thmax = int($num_cpus/$thread_per_job) || 1;
 	
 
 	@Options = (
