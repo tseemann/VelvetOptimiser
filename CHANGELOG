@@ -78,3 +78,7 @@ Changes since Version 2.0:
 2.2.4
 
 *	Fixed a bug when the starting and ending hash values were the same.
+
+2.2.5
+
+*	Re-configured velveth input line checker to handle new velvet options and hopefully future proof it.

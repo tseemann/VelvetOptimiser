@@ -20,6 +20,7 @@
 #		Version 1.1 - 14/07/2010 - Added support for changing input file types
 #		Version 1.2 - 11/08/2010 - Changed velveth help parser for new velvet help format
 #									Thanks to Alexie Papanicolaou - CSIRO for the patch.
+#		Version 1.3 - 05/10/2012 - Added support for new velveth options
 
 package VelvetOpt::hwrap;
 
