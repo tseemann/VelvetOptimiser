@@ -1,7 +1,7 @@
 #
 #       VelvetOpt::Utils.pm
 #
-#       Copyright 2008,2009,2010 Simon Gladman <simon.gladman@csiro.au>
+#       Copyright 2008,2009,2010 Simon Gladman <simon.gladman@monash.edu>
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
