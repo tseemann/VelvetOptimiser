@@ -114,6 +114,12 @@ my $thread_per_job = $ENV{OMP_NUM_THREADS} || 1;
 
 print STDERR "Velvet OMP compiler setting: $thread_per_job\n";
 
+#check Bioperl installed!
+BEGIN {
+	eval{ require Bio::SeqIO; 1;};
+	die "You do not have BioPerl intalled. See http://www.bioperl.org/wiki/Installing_BioPerl for help." if $@;
+}
+
 #get the options!
 &setOptions();
 
