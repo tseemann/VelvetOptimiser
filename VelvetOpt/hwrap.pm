@@ -236,9 +236,10 @@ sub _checkVHString {
 	
 	#get each m/-options+ filename+/ block
 	my @blocks;
-	while ($line =~ m/(\b(-\S+\s+)+[\w\/\\\. ]+)/g) {
+    $line =~ s/^/ /;
+    while ($line =~ m/(\b(-[\w\d]+\s+)+[\w\/\\\. ]+)/g) {
 		my $text = $1;
-		$text =~ s/\s+$//;
+        $text =~ s/\s+$//;
 		push @blocks, $text;
 	}
 	
