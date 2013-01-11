@@ -1,6 +1,6 @@
 #       VelvetOpt::Assembly.pm
 #
-#       Copyright 2008,2009 Simon Gladman <simon.gladman@monash.edu>
+#       Copyright 2008- Simon Gladman & Torsten Seemann
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -45,11 +45,11 @@ VelvetOpt::Assembly.pm - Velvet assembly container class.
 
 =head1 AUTHOR
 
-Simon Gladman, CSIRO, 2007, 2008.
+Simon Gladman & Torsten Seemann
 
 =head1 LICENSE
 
-Copyright 2008, 2009 Simon Gladman <simon.gladman@csiro.au>
+Copyright 2008- Simon Gladman & Torsten Seemann
 
        This program is free software; you can redistribute it and/or modify
        it under the terms of the GNU General Public License as published by
