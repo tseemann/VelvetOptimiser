@@ -166,14 +166,15 @@ sub getReadSizeNum {
 			elsif(/^-fastq/){
 				$currentfiletype = "fastq";
 			}
-			elsif(/(-eland)|(-gerald)|(-fasta.gz)|(-fastq.gz)/) {
+			elsif(/(-eland)|(-gerald)|(-fasta.gz)|(-fastq.gz)|(-bam)|(-sam)|(-fmtAuto)/) {
 				croak "Cannot estimate memory usage from file types other than fasta or fastq..\n";
 			}
 		}
 		elsif(-r $_){
+			# Probably should not just use the 1st read x #reads as people trim reads
 			my $file = $_;
 			if($currentfiletype eq "fasta"){
-				my $x = `grep -c "^>" $file`;
+				my $x = qx(grep -c "^>" $file);
 				chomp($x);
 				$num += $x;
 				my $l = &getReadLength($file, 'Fasta');
@@ -181,7 +182,7 @@ sub getReadSizeNum {
 				print STDERR "File: $file has $x reads of length $l\n";
 			}
 			else {
-				my $x = `grep -c "^@" $file`;
+				my $x = qx(grep -c "^@" $file);
 				chomp($x);
 				$num += $x;
 				my $l = &getReadLength($file, 'Fastq');

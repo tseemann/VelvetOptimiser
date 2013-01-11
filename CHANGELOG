@@ -82,3 +82,7 @@ Changes since Version 2.0:
 2.2.5
 
 *	Re-configured velveth input line checker to handle new velvet options and hopefully future proof it.
+
+2.2.6
+
+*	Memory estimator failing for -bam and -sam [Torsten]
