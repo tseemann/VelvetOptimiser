@@ -171,7 +171,7 @@ for(my $i = $hashs; $i <= $hashe; $i += $hashstep){
 }
 
 #check for $hashe in array..
-my $max = $hashvals[$#hashvals];
+my $max = $hashvals[-1];  # last element in array
 if($max < $hashe){
 	push @hashvals, $hashe;
 }
