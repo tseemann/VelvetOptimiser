@@ -19,7 +19,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-my $OptVersion = "2.2.5";
+my $OptVersion = "2.3.0";
 
 #
 #   pragmas
@@ -79,6 +79,7 @@ my $upperCovCutoff;
 my $threadfailed : shared = 0;
 my $finaldir;
 my $kmergenie;
+my $kmergenie_range;
 my $printVersion = 0;
 
 #
@@ -135,6 +136,20 @@ print "Logfile name: $logfile\n";
 #open the logfile
 open $OUT, ">$logfile" or die "Couldn't open $logfile for writing.\n$!\n";
 
+#check for the existance of kmergenie if required.
+if($kmergenie){
+    my $cmd = "which kmergenie 1>/dev/null 2>/dev/null";
+    if (system($cmd) == 0){
+        print STDERR "\tKmer genie installed and found.\n";
+        print $OUT "\tKmer genie installed and found.\n";
+    }
+    else {
+        print STDERR "\tKmer genie not installed. Please select start and end kmer sizes and re-run without kmergenie selected or install kmergenie and make sure it is available on your \$PATH environment variable.\n";
+        print $OUT "\tKmer genie not installed. Please select start and end kmer sizes and re-run without kmergenie selected or install kmergenie and make sure it is available on your \$PATH environment variable.\n";
+        exit(1);
+    }
+}
+
 #
 #
 #   Perform common tasks - write details to log file and screen, run velveth and vanilla velvetg
@@ -151,19 +166,72 @@ print STDERR "\tMaximum number of velvetinstances to run: $num_threads\n";
 
 #let user know about parameters to run with.
 print STDERR "Will run velvet optimiser with the following paramters:\n";
+print STDERR "\tWill use kmergenie to estimate start hash values\n" if $kmergenie;
 print STDERR "\tVelveth parameter string:\n\t\t$readfile\n";
-print STDERR "\tVelveth start hash values:\t$hashs\n";
-print STDERR "\tVelveth end hash value:\t\t$hashe\n";
+print STDERR "\tVelveth start hash values:\t$hashs\n" if !$kmergenie;
+print STDERR "\tVelveth end hash value:\t\t$hashe\n" if!$kmergenie;
 print STDERR "\tVelveth hash step value:\t$hashstep\n";
 print STDERR "\tVelvetg minimum coverage cutoff to use:\t$minCovCutoff\n\n";
 if($vgoptions){
-	print $OUT "\tUser specified velvetg options: $vgoptions\n";
+	print STDERR "\tUser specified velvetg options: $vgoptions\n";
 }
 if($amos){
     print STDERR "\tRead tracking for final assembly on.\n";
 } else {
     print STDERR "\tRead tracking for final assembly off.\n";
 }
+
+
+
+if($genomesize){
+	my $x = &estMemUse();
+	printf STDERR "\nMemory use estimated to be: %.1fGB for $num_threads threads.\n\n", $x;
+	if ($x < $currfreemem){
+		print STDERR "You should have enough memory to complete this job. (Though this estimate is no guarantee..)\n";
+		exit(0);
+	}
+	else {
+		print STDERR "You probably won't have enough memory to run this job.\nTry decreasing the maximum number of threads used.\n(use the -t option to set max threads.)\n";
+		exit(0);
+	}
+}
+
+
+print $OUT strftime("%b %e %H:%M:%S", localtime), "\n";
+
+#send run parameters to log file.
+print $OUT "Will run velvet optimiser with the following paramters:\n";
+print $OUT "\tWill use kmergenie to estimate start hash values\n" if $kmergenie;
+print $OUT "\tVelveth parameter string:\n\t\t$readfile\n";
+print $OUT "\tVelveth start hash values:\t$hashs\n" if !$kmergenie;
+print $OUT "\tVelveth end hash value:\t\t$hashe\n" if !$kmergenie;
+print $OUT "\tVelveth hash step value:\t$hashstep\n";
+print $OUT "\tVelvetg minimum coverage cutoff to use:\t$minCovCutoff\n\n";
+if($vgoptions){
+	print $OUT "\tUser specified velvetg options: $vgoptions\n";
+}
+if($amos){
+    print $OUT "\tRead tracking for final assembly on.\n";
+} else {
+    print $OUT "\tRead tracking for final assembly off.\n";
+}
+
+#run kmer genie if required!
+print STDERR strftime("%b %e %H:%M:%S", localtime), " Beginning Kmergenie run.\n" if $kmergenie;
+print $OUT strftime("%b %e %H:%M:%S", localtime), " Beginning Kmergenie run.\n"if $kmergenie;
+
+if($kmergenie){
+    print STDERR "\tKmer genie selected! Will set start and end kmer values to search the region near the kmergenie optimum\n";
+    my $bestk = VelvetOpt::Utils::runKmerGenie($readfile,$maxhash);
+    if($bestk){
+        $hashs = $bestk-$kmergenie_range;
+        $hashe = $bestk+$kmergenie_range;
+    }
+    else {
+        die "Kmer genie failed! $!";
+    }
+}
+
 
 #build the hashval array - steps too...
 for(my $i = $hashs; $i <= $hashe; $i += $hashstep){
@@ -177,37 +245,7 @@ if($max < $hashe){
 	push @hashvals, $hashe;
 }
 
-if($genomesize){
-	my $x = &estMemUse();
-	printf STDERR "\nMemory use estimated to be: %.1fGB for $num_threads threads.\n\n", $x;
-	if ($x < $currfreemem){
-		print STDERR "You should have enough memory to complete this job. (Though this estimate is no guarantee..)\n";
-		exit;
-	}
-	else {
-		print STDERR "You probably won't have enough memory to run this job.\nTry decreasing the maximum number of threads used.\n(use the -t option to set max threads.)\n";
-		exit;
-	}
-}
 
-
-print $OUT strftime("%b %e %H:%M:%S", localtime), "\n";
-
-#send run parameters to log file.
-print $OUT "Will run velvet optimiser with the following paramters:\n";
-print $OUT "\tVelveth parameter string:\n\t\t$readfile\n";
-print $OUT "\tVelveth start hash values:\t$hashs\n";
-print $OUT "\tVelveth end hash value:\t\t$hashe\n";
-print $OUT "\tVelveth hash step value:\t$hashstep\n";
-print $OUT "\tVelvetg minimum coverage cutoff to use:\t$minCovCutoff\n\n";
-if($vgoptions){
-	print $OUT "\tUser specified velvetg options: $vgoptions\n";
-}
-if($amos){
-    print $OUT "\tRead tracking for final assembly on.\n";
-} else {
-    print $OUT "\tRead tracking for final assembly off.\n";
-}
 
 print STDERR strftime("%b %e %H:%M:%S", localtime), " Beginning velveth runs.\n";
 print $OUT strftime("%b %e %H:%M:%S", localtime), "\n\n\tBeginning velveth runs.\n";
@@ -429,6 +467,7 @@ sub setOptions {
 		{OPT=>"d|dir_final=s", VAR=>\$finaldir, DEFAULT=>'.', DESC=>"The name of the directory to put the final output into."},
 		{OPT=>"z|upperCovCutoff=f", VAR=>\$upperCovCutoff, DEFAULT=>0.8, DESC=>"The maximum coverage cutoff to consider as a multiplier of the expected coverage."},
         {OPT=>"kmergenie!",VAR=>\$kmergenie,DEFAULT=>0,DESC=>"Use kmergenie to set the kmer to use. NOTE: kmer genie must be available on your path."},
+        {OPT=>"kmergenie_range=i",VAR=>\$kmergenie_range,DEFAULT=>4,DESC=>"The range of kmer sizes to search above and below the kmergenie chosen kmer size."},
 	);
 
 	(@ARGV < 1) && (usage());
@@ -454,16 +493,16 @@ sub setOptions {
 		&usage();
 	}
 	
-    if($kmergenie){
-        print STDERR "\tKmer genie selected! Will set start and end kmer values to search the region near the kmergenie optimum\n";
-        my $bestk = VelvetOpt::Utils::runKmerGenie($readfile,$maxhash);
-        if($bestk){
-            $hashs = $bestk-4;
-            $hashe = $bestk+4;
-        }
-        else {
-            die "Kmer genie failed! $!";
-        }
+        
+    if ($kmergenie_range && !$kmergenie){
+        print STDERR "\tKmer genie search range specified but kmer genie not selected. Automatically selecting kmer genie option.\n";
+        $kmergenie = 1;
+    }
+    
+    if(&isOdd($kmergenie_range)){
+        print STDERR "\tKmer genie range must be an even integer.\n";
+        $kmergenie_range --;
+        print STDERR "\tNew kmergenie range = $kmergenie_range\n"
     }
     
     if($hashs > $maxhash){

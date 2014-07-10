@@ -86,3 +86,7 @@ Changes since Version 2.0:
 2.2.6
 
 *	Memory estimator failing for -bam and -sam [Torsten]
+
+2.3.0
+
+*   Incorporated kmergenie as an option to help determine the kmer size search range.

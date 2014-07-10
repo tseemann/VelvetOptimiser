@@ -6,7 +6,7 @@ VelvetOptimiser
 VERSION
 =======
 
-Version 2.2.5
+Version 2.3.0
 
 LICENCE
 =======
@@ -57,29 +57,28 @@ GNU utilities: grep sed free cut
 COMMAND LINE
 ============
 	
-	VelvetOptimiser.pl [options] -f 'velveth input line'
-  
-  Options:
-  
-  --help          	This help.
-  --V|version!		Print version to stdout and exit.
-  --v|verbose+    	Verbose logging, includes all velvet output in the logfile. (default '0').
-  --s|hashs=i     	The starting (lower) hash value (default '19').
-  --e|hashe=i     	The end (higher) hash value (default '31').
-  --x|step=i      	The step in hash search..  min 2, no odd numbers (default '2').
+	Usage: ./VelvetOptimiser.pl [options] -f 'velveth input line'
+  --help          This help.
+  --version!      Print version to stdout and exit. (default '0').
+  --v|verbose+    Verbose logging, includes all velvet output in the logfile. (default '0').
+  --s|hashs=i     The starting (lower) hash value (default '19').
+  --e|hashe=i     The end (higher) hash value (default '191').
+  --x|step=i      The step in hash search..  min 2, no odd numbers (default '2').
   --f|velvethfiles=s The file section of the velveth command line. (default '0').
-  --a|amosfile!   	Turn on velvet's read tracking and amos file output. (default '0').
+  --a|amosfile!   Turn on velvet's read tracking and amos file output. (default '0').
   --o|velvetgoptions=s Extra velvetg options to pass through.  eg. -long_mult_cutoff -max_coverage etc (default '').
-  --t|threads=i   	The maximum number of simulataneous velvet instances to run. (default '4').
-  --g|genomesize=f 	The approximate size of the genome to be assembled in megabases.
-					Only used in memory use estimation. If not specified, memory use estimation
-					will not occur. If memory use is estimated, the results are shown and then program exits. (default '0').
+  --t|threads=i   The maximum number of simulataneous velvet instances to run. (default '2').
+  --g|genomesize=f The approximate size of the genome to be assembled in megabases.
+			Only used in memory use estimation. If not specified, memory use estimation
+			will not occur. If memory use is estimated, the results are shown and then program exits. (default '0').
   --k|optFuncKmer=s The optimisation function used for k-mer choice. (default 'n50').
-  --c|optFuncCov=s 	The optimisation function used for cov_cutoff optimisation. (default 'Lbp').
-  --p|prefix=s    	The prefix for the output filenames, the default is the date and time in the format DD-MM-YYYY-HH-MM_. (default 'auto').
-  --d|dir_final=s The name of the directory to put the final output into. (default '.')
+  --c|optFuncCov=s The optimisation function used for cov_cutoff optimisation. (default 'Lbp').
+  --m|minCovCutoff=f The minimum cov_cutoff to be used. (default '0').
+  --p|prefix=s    The prefix for the output filenames, the default is the date and time in the format DD-MM-YYYY-HH-MM_. (default 'auto').
+  --d|dir_final=s The name of the directory to put the final output into. (default '.').
   --z|upperCovCutoff=f The maximum coverage cutoff to consider as a multiplier of the expected coverage. (default '0.8').
-  
+  --kmergenie!    Use kmergenie to set the kmer to use. NOTE: kmer genie must be available on your path. (default '0').
+  --kmergenie_range=i The range of kmer sizes to search above and below the kmergenie chosen kmer size. (default '4').
 
 Advanced!: Changing the optimisation function(s)
 
@@ -116,6 +115,10 @@ Find the best assembly for Illumina paired end reads just for k=31, using four t
 but optimizing for N50 for k-mer length rather than sum of large contig sizes:
 
 % VelvetOptimiser.pl -s 31 -e 31 -f '-shortPaired -fasta interleaved.fasta' -t 4 --optFuncKmer 'n50'
+
+Use kmergenie to set the kmer size search range.
+
+% VelvetOptimiser.pl -f '-shortPaired -fasta interleaved.fasta' --kmergenie
 
 
 DETAILED OPTIONS
@@ -289,6 +292,18 @@ DETAILED OPTIONS
 	Default: 0.8
 	
 	Uses this fraction of the expected coverage to set the upper limit of the coverage cutoff range to search for the optimum in.
+    
+--kmergenie
+
+    Default: Off
+    Turns on the use of kmer genie to set the start and end hash sizes. Will only work if kmer genie is installed and available in the $PATH environment variable.
+    
+--kmergenie_range
+    
+    Parameter type required: integer (even)
+    Default: 4
+    
+    Uses this value to set the start and end hash values for optimum searching. Start value will be (kmergenie optimum) - kmergenie_range, end value will be (kmergeni optimum) + kmergenie_range
 
 BUGS
 ====

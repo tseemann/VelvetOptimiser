@@ -18,7 +18,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-#		Version 2.1.3
+#		Version 2.1.4
 
 #	Changes for Version 2.0.1
 #	Added Mikael Brandstrom Durling's numCpus and freeMem for the Mac.
@@ -32,7 +32,9 @@
 #	Changes for Version 2.1.3
 #	Changed the minimum contig size to use for estimating expected coverage to 3*kmer size -1 and set the minimum coverage to 2 instead of 0.
 #	This should get rid of exp_covs of 1 when it should be very high for assembling reads that weren't ampped to a reference using one of the standard read mapping programs
-
+#   
+#   Changes for Version 2.1.4
+#   Added runKmerGenie functionality.
 
 package VelvetOpt::Utils;
 
