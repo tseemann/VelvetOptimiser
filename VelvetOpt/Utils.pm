@@ -250,9 +250,9 @@ sub runKmerGenie {
     my $bestk = $1 || 0;
     print STDERR "The best k is: $1\n";
     
-    unlink "kmergenie_out*.pdf";
-    unlink "kmergenie_out*.histo";
-    unlink "kmergenie_out*.html";
+    foreach my $file (glob "kmergenie_out*"){
+        unless($file =~ m/dat$/){ unlink $file; }
+    }
     
     #print STDERR "$kgout\n";
     return $bestk;
