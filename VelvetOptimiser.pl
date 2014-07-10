@@ -78,6 +78,7 @@ my $minCovCutoff;
 my $upperCovCutoff;
 my $threadfailed : shared = 0;
 my $finaldir;
+my $kmergenie;
 my $printVersion = 0;
 
 #
@@ -427,6 +428,7 @@ sub setOptions {
 		{OPT=>"p|prefix=s", VAR=>\$prefix, DEFAULT=>'auto', DESC=>"The prefix for the output filenames, the default is the date and time in the format DD-MM-YYYY-HH-MM_."},
 		{OPT=>"d|dir_final=s", VAR=>\$finaldir, DEFAULT=>'.', DESC=>"The name of the directory to put the final output into."},
 		{OPT=>"z|upperCovCutoff=f", VAR=>\$upperCovCutoff, DEFAULT=>0.8, DESC=>"The maximum coverage cutoff to consider as a multiplier of the expected coverage."},
+        {OPT=>"kmergenie!",VAR=>\$kmergenie,DEFAULT=>0,DESC=>"Use kmergenie to set the kmer to use. NOTE: kmer genie must be available on your path."},
 	);
 
 	(@ARGV < 1) && (usage());
@@ -452,6 +454,18 @@ sub setOptions {
 		&usage();
 	}
 	
+    if($kmergenie){
+        print STDERR "\tKmer genie selected! Will set start and end kmer values to search the region near the kmergenie optimum\n";
+        my $bestk = VelvetOpt::Utils::runKmerGenie($readfile,$maxhash);
+        if($bestk){
+            $hashs = $bestk-4;
+            $hashe = $bestk+4;
+        }
+        else {
+            die "Kmer genie failed! $!";
+        }
+    }
+    
     if($hashs > $maxhash){
         print STDERR "\tStart hash value too high.  New start hash value is $maxhash.\n";
         $hashs = $maxhash;

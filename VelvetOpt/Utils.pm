@@ -204,7 +204,7 @@ sub getReadSizeNum {
 	printf STDERR "Total reads: %.1f million. Avg length: %.1f\n",($num/1000000), ($totlength/$num);
 	return @results;
 }
-
+ 
 # getReadLength - returns the length of the first read in a file of type fasta or fastq..
 #
 sub getReadLength {
@@ -212,6 +212,50 @@ sub getReadLength {
 	my $sio = Bio::SeqIO->new(-file => $f, -format => $t);
 	my $s = $sio->next_seq() or croak "Something went bad while reading file $f!\n";
 	return $s->length;
+}
+
+sub runKmerGenie {
+    my $f = shift;
+    my $maxk = shift;
+	my %reads;
+	my $num = 0;
+	#first pull apart the velveth string and get the short and shortpaired filenames...
+	my @l = split /\s+/, $f;
+	foreach (@l){
+		if(/^-/){
+			if(/(-eland)|(-gerald)|(-bam)|(-sam)|(-fmtAuto)/) {
+				croak "Cannot run kmergenie on file types other than fasta, fasta.gz, fastq or fastq.gz.\n";
+			}
+		}
+		elsif(-r $_){
+			# Probably should not just use the 1st read x #reads as people trim reads
+			my $file = $_;
+			$reads{$file} ++;
+		}
+	}
+    unless( open FOF, ">fof.txt" ) { print STDERR "Failed to open text file for writing read filenames into."; return 0; }
+	foreach my $k (keys %reads){
+		print FOF "$k\n";
+	}
+    close FOF;
+    
+    my $kmergeniemaxk = $maxk;
+    if ($maxk > 121){
+        $kmergeniemaxk = 121;
+    }
+    
+    my $kgout = `kmergenie -k $kmergeniemaxk -l 21 fof.txt -o kmergenie_out`;
+    
+    $kgout =~ m/best k: (\d+)$/;
+    my $bestk = $1 || 0;
+    print STDERR "The best k is: $1\n";
+    
+    unlink "kmergenie_out*.pdf";
+    unlink "kmergenie_out*.histo";
+    unlink "kmergenie_out*.html";
+    
+    #print STDERR "$kgout\n";
+    return $bestk;
 }
 
 return 1;
