@@ -69,6 +69,8 @@ my $ass_num = 1;
 my $categories;
 my $prefix;
 my $OUT;
+my @error_log;
+my @memory_errors;
 my $logSem : shared;
 our $num_threads;
 my $current_threads : shared = 0;
@@ -218,13 +220,20 @@ foreach my $hashval (@hashvals){
 	while($current_threads >= $num_threads){
 		sleep(2);
 	}
-	if($threadfailed){
+	if($threadfailed == 1){
 		for my $thr (threads->list) {
 			print STDERR "Waiting for thread ",$thr->tid," to complete.\n";
 			$thr->join;
 		}
 		die "Velveth failed to run! Must be a problem with file types, check by running velveth manually or by using -v option and reading the log file.\n";
-	}	
+	}
+  elsif($threadfailed == 2){
+    for my $thr (threads->list) {
+      print STDERR "Waiting for thread ",$thr->tid," to complete.\n";
+      $thr->join;
+    }
+    die "Velveth failed to run because it ran out of memory. See logfile for more details and try reducing the number of threads using the -t option.\n";
+  }
 	$threads[$ass_num] = threads->create(\&runVelveth, $readfile, $hashval, $vhversion, \$logSem, $ass_num);
 	$ass_num ++;
 	sleep(2);
@@ -322,7 +331,7 @@ print $OUT strftime("%b %e %H:%M:%S", localtime), " Optimisation routine chosen 
 #now send the best assembly so far to the appropriate optimisation routine...
 
 if($optRoute eq "shortOpt"){
-	
+
 	&expCov($assembliesObjs{$bestId});
     &covCutoff($assembliesObjs{$bestId});
 
@@ -384,10 +393,10 @@ else {
 
 #delete superfluous directories..
 foreach my $key(keys %assemblies){
-	unless($key == $bestId){ 
+	unless($key == $bestId){
 		my $dir = $assembliesObjs{$key}->{ass_dir};
 		system('rm', '-r', '--preserve-root', $dir);
-	} 
+	}
 }
 unless ($finaldir eq "."){
 	rename $assembliesObjs{$bestId}->{ass_dir}, $finaldir;
@@ -407,13 +416,13 @@ sub setOptions {
 	use Getopt::Long;
 	my $num_cpus = VelvetOpt::Utils::num_cpu;
 	my $thmax = int($num_cpus/$thread_per_job) || 1;
-	
+
 
 	@Options = (
 		{OPT=>"help",    VAR=>\&usage,             DESC=>"This help"},
 		{OPT=>"version!", VAR=>\$printVersion, DEFAULT=>0, DESC=>"Print version to stdout and exit."},
 		{OPT=>"v|verbose+", VAR=>\$verbose, DEFAULT=>0, DESC=>"Verbose logging, includes all velvet output in the logfile."},
-		{OPT=>"s|hashs=i", VAR=>\$hashs, DEFAULT=>19, DESC=>"The starting (lower) hash value"}, 
+		{OPT=>"s|hashs=i", VAR=>\$hashs, DEFAULT=>19, DESC=>"The starting (lower) hash value"},
 		{OPT=>"e|hashe=i", VAR=>\$hashe, DEFAULT=>$maxhash, DESC=>"The end (higher) hash value"},
 		{OPT=>"x|step=i", VAR=>\$hashstep, DEFAULT=>2, DESC=>"The step in hash search..  min 2, no odd numbers"},
 		{OPT=>"f|velvethfiles=s", VAR=>\$readfile, DEFAULT=>0, DESC=>"The file section of the velveth command line."},
@@ -439,19 +448,19 @@ sub setOptions {
 		${$_->{VAR}} = $_->{DEFAULT};
 		}
 	}
-	
+
 	if ($printVersion) {
 		print "VelvetOptimiser $OptVersion\n";
 		exit 0;
         }
 
 	print STDERR strftime("%b %e %H:%M:%S", localtime), " Starting to check input parameters.\n";
-	
+
 	unless($readfile){
 		print STDERR "\tYou must supply the velveth parameter line in quotes. eg -f '-short .....'\n";
 		&usage();
 	}
-	
+
     if($hashs > $maxhash){
         print STDERR "\tStart hash value too high.  New start hash value is $maxhash.\n";
         $hashs = $maxhash;
@@ -460,7 +469,7 @@ sub setOptions {
         $hashs = $hashs - 1;
         print STDERR "\tStart hash value not odd.  Subtracting one. New start hash value = $hashs\n";
     }
-    
+
     if(&isOdd($hashstep)){
 		print STDERR "\tOld hash step value $hashstep\n";
 		$hashstep --;
@@ -473,7 +482,7 @@ sub setOptions {
 	if($hashstep < 2){
 		$hashstep = 2;
 		print STDERR "\tHash step set below minimum of 2.  New hash step value = 2\n";
-	}	
+	}
 	if($hashe > $maxhash || $hashe < 1){
         print STDERR "\tEnd hash value not in workable range.  New end hash value is $maxhash.\n";
         $hashe = $maxhash;
@@ -486,26 +495,26 @@ sub setOptions {
         $hashe = $hashe - 1;
         print STDERR "\tEnd hash value not odd.  Subtracting one. New end hash value = $hashe\n";
     }
-    
+
     if($num_threads > $thmax){
 		print STDERR "\tWARNING: You have set the number of threads to use to a value greater than the number of available CPUs.\n";
 		print STDERR "\tWARNING: This may be because of the velvet compile option for OMP.\n";
 	}
-	
+
 	#check the velveth parameter string..
 	my $vh_ok = VelvetOpt::hwrap::_checkVHString("check 21 $readfile", $categories);
 
 	unless($vh_ok){ die "Please re-start with a corrected velveth parameter string." }
-	
+
 	print STDERR "\tVelveth parameter string OK.\n";
-	
+
 	#test if outdir exists...
 	if(-d $finaldir && $finaldir ne "."){
 		die "Output directory $finaldir already exists, please choose a different name and restart.\n";
 	}
 
 	print STDERR strftime("%b %e %H:%M:%S", localtime), " Finished checking input parameters.\n";
-	
+
 }
 
 sub usage {
@@ -518,7 +527,7 @@ sub usage {
 	print VelvetOpt::Assembly::opt_func_toString;
 	exit(1);
 }
- 
+
 #----------------------------------------------------------------------
 
 
@@ -527,19 +536,19 @@ sub usage {
 #
 
 sub runVelveth{
-	
+
 	{
 		lock($current_threads);
 		$current_threads ++;
 	}
-	
+
 	my $rf = shift;
 	my $hv = shift;
 	my $vv = shift;
 	my $semRef = shift;
 	my $anum = shift;
 	my $assembly;
-	
+
 	print STDERR strftime("%b %e %H:%M:%S", localtime), "\t\tRunning velveth with hash value: $hv.\n";
 
     #make the velveth command line.
@@ -552,31 +561,43 @@ sub runVelveth{
     my $vhresponse = VelvetOpt::hwrap::objectVelveth($assembly, $categories);
 
     unless($vhresponse){ die "Velveth didn't run on hash value of $hv.\n$!\n";}
-	
-	unless(-r ($prefix . "_data_$hv" . "/Roadmaps")){ 
+
+	unless(-r ($prefix . "_data_$hv" . "/Roadmaps")){
 		print STDERR "Velveth failed!  Response:\n$vhresponse\n";
 		{
 			lock ($threadfailed);
 			$threadfailed = 1;
 		}
 	}
-    
+
 	#run the hashdetail generation routine.
     $vhresponse = $assembly->getHashingDetails();
-    
+
+  # check whether the assembly ran out of memory
+  @error_log = split(/\n/,$assembly->toString());
+  @memory_errors = grep(/No more memory for memory chunk/,@error_log);
+  if (scalar @memory_errors > 0) {
+    print "velveth ran out of memory while running on hash value of $hv\n";
+    print "Error: " . join(", ",@memory_errors) . "\n";
+    {
+      lock ($threadfailed);
+      $threadfailed = 2;
+    }
+  }
+
 	#print the objects to the log file...
 	{
 		lock($$semRef);
 		print $OUT $assembly->toStringNoV() if !$verbose;
 		print $OUT $assembly->toString() if $verbose;
 	}
-	
+
 	{
 		lock(%assemblies);
 		my $ass_str = freeze($assembly);
 		$assemblies{$anum} = $ass_str;
 	}
-	
+
 	{
 		lock($current_threads);
 		$current_threads --;
@@ -593,26 +614,26 @@ sub runVelvetg{
 		lock($current_threads);
 		$current_threads ++;
 	}
-	
+
 	my $vv = shift;
 	my $semRef = shift;
 	my $anum = shift;
 	my $assembly;
-	
+
 	#get back the object!
 	$assembly = bless thaw($assemblies{$anum}), "VelvetOpt::Assembly";
-	
+
 	print STDERR strftime("%b %e %H:%M:%S", localtime), "\t\tRunning vanilla velvetg on hash value: " . $assembly->{hashval} . "\n";
 
 	#make the velvetg commandline.
     my $vgline = $prefix . "_data_" . $assembly->{hashval};
-	
+
 	$vgline .= " $vgoptions";
 	$vgline .= " -clean yes";
 
     #save the velvetg commandline in the assembly.
     $assembly->{pstringg} = $vgline;
-	
+
 	#save the velvetg version in the assembly.
 	$assembly->{versiong} = $vv;
 
@@ -630,13 +651,13 @@ sub runVelvetg{
 		print $OUT $assembly->toStringNoV() if !$verbose;
 		print $OUT $assembly->toString() if $verbose;
 	}
-	
+
 	{
 		lock(%assemblies);
 		my $ass_str = freeze($assembly);
 		$assemblies{$anum} = $ass_str;
 	}
-	
+
 	{
 		lock($current_threads);
 		$current_threads --;
@@ -721,7 +742,7 @@ sub covCutoff{
     #get the assembly score and set the current cutoff score.
     my $ass_score = $ass->{assmscore};
     print "In covCutOff and assembly score is: $ass_score..\n" if $interested;
-	
+
 
 
 	sub func {
@@ -751,11 +772,11 @@ sub covCutoff{
         }
         $ass_score = $ass->{assmscore};
 		print $OUT $ass->toStringNoV();
-		
+
 		return $ass_score;
-		
+
 	}
-	
+
 	print STDERR strftime("%b %e %H:%M:%S", localtime), " Beginning coverage cutoff optimisation\n";
     print $OUT strftime("%b %e %H:%M:%S", localtime), " Beginning coverage cutoff optimisation\n";
 
@@ -772,7 +793,7 @@ sub covCutoff{
         print $OUT strftime("%b %e %H:%M:%S", localtime), " Warning: Minimum coverage cutoff is set to be higher than 50% of the expected coverage.  Please consider lowering minCovCutoff.\n";
         print STDERR strftime("%b %e %H:%M:%S", localtime), " Warning: Minimum coverage cutoff is set to be higher than 50% of the expected coverage.  Please consider lowering minCovCutoff.\n";
     }
-	
+
 	my $a = $minCovCutoff;
 	my $b = $upperCovCutoff * $expCov;
 	my $t = 0.618;
@@ -782,10 +803,10 @@ sub covCutoff{
 	my $fd = func($ass, $d);
 
 	my $iters = 1;
-	
+
 	printf STDERR "\t\tLooking for best cutoff score between %.3f and %.3f\n", $a, $b;
 	printf $OUT "\t\tLooking for best cutoff score between %.3f and %.3f\n", $a, $b;
-	
+
 	while(abs($a -$b) > 1){
 		if($fc > $fd){
 			printf STDERR "\t\tMax cutoff lies between %.3f & %.3f\n", $d, $b;
@@ -850,7 +871,7 @@ sub expCov {
     }
 
     $ass->{pstringg} = $vg;
-    
+
     print $OUT $ass->toStringNoV();
 
 }
@@ -900,10 +921,10 @@ sub insLengthShort {
 
 
 #
-#	estMemUse - estimates the memory usage from 
+#	estMemUse - estimates the memory usage from
 #
 sub estMemUse {
-	
+
 	my $max_runs = @hashvals;
 	my $totmem = 0;
 	#get the read lengths and the number of reads...
