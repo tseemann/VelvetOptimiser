@@ -54,7 +54,7 @@ coverage in all active short columns of the `stats.txt` file.
 
 ### Dependencies
 
-*   Velvet => 0.7.51
+*   Velvet => 1.1
 *   Perl => 5.8.8
 *   BioPerl >= 1.4
 *   GNU utilities: grep sed free cut
@@ -79,14 +79,16 @@ conda install -c bioconda perl-velvetoptimiser
 
 ```
 # Step 1
-wget -O velvetoptimiser_2.2.5.tar.gz https://github.com/tseemann/VelvetOptimiser/releases/tag/2.2.5
+wget -O velvetoptimiser_2.2.6.tar.gz https://github.com/tseemann/VelvetOptimiser/releases/tag/2.2.6
 
 # Step 2
-mkdir $HOME/src && mv velvetoptimiser_2.2.5.tar.gz  $HOME/src && tar zxvf velvetoptimiser_2.2.5.tar.gz
+mkdir $HOME/src && mv velvetoptimiser_2.2.6.tar.gz  $HOME/src && tar zxvf velvetoptimiser_2.2.6.tar.gz
 
 # Step 3
-echo "export PATH=$PATH:$HOME/src/velvetoptimiser_2.2.5"
+echo "export PATH=$PATH:$HOME/src/velvetoptimiser_2.2.6"
 ```
+
+### Testing the installation
 
 You can test it with:
 
@@ -94,12 +96,18 @@ You can test it with:
 VelvetOptimiser.pl --help
 ```
 
+or for a more comprehensive test:
+
+```
+cd $HOME/src/VelvetOptimiser/test
+./run_test.sh
+```
 
 <!-- ADD SOME INFORMATION HOW HOW TO INSTALL -->
 
 ## Version
 
-Version 2.2.5
+Version 2.2.6
 
 ## Command Line
 
@@ -136,17 +144,17 @@ VelvetOptimiser.pl \[options\] -f 'velveth input line'
 
 ## Examples
 
-Find the best assembly for a lane of Illumina single-end reads, trying k-values between 27 and 31:
+Find the best assembly for a lane of Illumina single-end reads, trying k-values between 53 and 75:
 
 ```
-% VelvetOptimiser.pl -s 27 -e 31 -f '-short -fastq s_1_sequence.txt'
+% VelvetOptimiser.pl -s 53 -e 75 -f '-short -fastq s_1_sequence.txt'
 ```
 
 Print an estimate of how much RAM is needed by the above command, if we use eight threads at once,
 and we estimate our assembled genome to be 4.5 megabases long:
 
 ```
-% VelvetOptimiser.pl -s 27 -e 31 -f '-short -fastq s_1_sequence.txt' -g 4.5 -t 8
+% VelvetOptimiser.pl -s 53 -e 75 -f '-short -fastq s_1_sequence.txt' -g 4.5 -t 8
 ```
 
 Find the best assembly for Illumina paired end reads just for k=31, using four threads (eg. quad core CPU),

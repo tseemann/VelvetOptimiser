@@ -85,4 +85,8 @@ Changes since Version 2.0:
 
 2.2.6
 
-*	Memory estimator failing for -bam and -sam [Torsten]
+*   Changed README to a markdown document. Thanks @andergs!
+*   Fixed a findbin issue
+*   Uses File::Path remove_tree instead of "rm -r" during cleanup. Thanks for the suggestion @tseemann!
+*   Memory estimator can now work with fastq.gz files.
+*   Memory estimator failing for -bam and -sam [Torsten]

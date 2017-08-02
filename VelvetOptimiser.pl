@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 #       VelvetOptimiser.pl
 #
@@ -19,7 +19,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-my $OptVersion = "2.2.5";
+my $OptVersion = "2.2.6";
 
 #
 #   pragmas
@@ -31,7 +31,7 @@ use warnings;
 #
 use POSIX qw(strftime);
 use FindBin;
-use lib "$FindBin::Bin";
+use lib "$FindBin::RealBin";
 use threads;
 use threads::shared;
 use VelvetOpt::Assembly;
@@ -41,6 +41,7 @@ use VelvetOpt::Utils;
 use Data::Dumper;
 use Storable qw (freeze thaw);
 use Getopt::Long;
+use File::Path qw (remove_tree);
 
 
 #
@@ -395,7 +396,8 @@ else {
 foreach my $key(keys %assemblies){
 	unless($key == $bestId){
 		my $dir = $assembliesObjs{$key}->{ass_dir};
-		system('rm', '-r', '--preserve-root', $dir);
+		#system('rm', '-r', '--preserve-root', $dir);
+        remove_tree($dir);
 	}
 }
 unless ($finaldir eq "."){
@@ -880,43 +882,20 @@ sub expCov {
 #   insLengthLong - get the Long insert length and use it in the assembly..
 #
 sub insLengthLong {
-    print STDERR strftime("%b %e %H:%M:%S", localtime), " Getting the long insert length\n";
-    print $OUT strftime("%b %e %H:%M:%S", localtime), " Getting the long insert length\n";
     my $ass = shift;
     my $len = "auto";
     print STDERR strftime("%b %e %H:%M:%S", localtime), " Setting assembly long insert length $len\n";
     print $OUT strftime("%b %e %H:%M:%S", localtime), " Setting assembly long insert length $len\n";
-
-    #re-write the pstringg with the new velvetg command..
-    #my $vg = $ass->{pstringg};
-    #if($vg =~ /ins_length_long/){
-    #    $vg =~ s/ins_length_long\s+\d+/ins_length_long $len/;
-    #}
-    #else {
-    #    $vg .= " -ins_length_long $len";
-    #}
 }
 
 #
 #   insLengthShort - get the short insert length and use it in the assembly..
 #
 sub insLengthShort {
-    print STDERR strftime("%b %e %H:%M:%S", localtime), " Setting the short insert length\n";
-    print $OUT strftime("%b %e %H:%M:%S", localtime), " Setting the short insert length\n";
     my $ass = shift;
 	my $len = "auto";
     print STDERR strftime("%b %e %H:%M:%S", localtime), " Setting assembly short insert length(s) to $len\n";
     print $OUT strftime("%b %e %H:%M:%S", localtime), " Setting assembly short insert length(s) to $len\n";
-
-    #re-write the pstringg with the new velvetg command..
-    #my $vg = $ass->{pstringg};
-    #if($vg =~ /ins_length /){
-    #    $vg =~ s/ins_length\s+\d+/ins_length $len/;
-    #}
-    #else {
-    #    $vg .= " -ins_length $len";
-    #}
-    #$ass->{pstringg} = $vg;
 }
 
 
