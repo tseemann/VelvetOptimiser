@@ -18,7 +18,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-#		Version 2.1.3
+#		Version 2.2.6
 
 #	Changes for Version 2.0.1
 #	Added Mikael Brandstrom Durling's numCpus and freeMem for the Mac.
@@ -32,6 +32,9 @@
 #	Changes for Version 2.1.3
 #	Changed the minimum contig size to use for estimating expected coverage to 3*kmer size -1 and set the minimum coverage to 2 instead of 0.
 #	This should get rid of exp_covs of 1 when it should be very high for assembling reads that weren't ampped to a reference using one of the standard read mapping programs
+#
+#   Changes for Version 2.2.6
+#   Added the ability for the memory estimator to open fastq.gz files.
 
 
 package VelvetOpt::Utils;
@@ -163,10 +166,13 @@ sub getReadSizeNum {
 			if(/^-fasta/){
 				$currentfiletype = "fasta";
 			}
+            elsif(/^-fastq\.gz/){
+                $currentfiletype = "fastq.gz";
+            }
 			elsif(/^-fastq/){
 				$currentfiletype = "fastq";
 			}
-			elsif(/(-eland)|(-gerald)|(-fasta.gz)|(-fastq.gz)|(-bam)|(-sam)|(-fmtAuto)/) {
+			elsif(/(-eland)|(-gerald)|(-fasta.gz)|(-bam)|(-sam)|(-fmtAuto)/) {
 				croak "Cannot estimate memory usage from file types other than fasta or fastq..\n";
 			}
 		}
@@ -181,6 +187,14 @@ sub getReadSizeNum {
 				$reads{$l} += $x;
 				print STDERR "File: $file has $x reads of length $l\n";
 			}
+            elsif($currentfiletype eq "fastq.gz"){
+                my $x = qx(zgrep -c "^@" $file);
+                chomp($x);
+                $num += $x;
+                my $l = &getReadLength($file, "Fastq.gz");
+                $reads{$l} += $x;
+                print STDERR "File: $file has $x reads of length $l\n";
+            }
 			else {
 				my $x = qx(grep -c "^@" $file);
 				chomp($x);
@@ -209,7 +223,14 @@ sub getReadSizeNum {
 #
 sub getReadLength {
 	my ($f, $t) = @_;
-	my $sio = Bio::SeqIO->new(-file => $f, -format => $t);
+    my $sio;
+    if ($t eq "Fastq.gz"){
+        open my $zcat, "gunzip -c $f |" or croak $!;
+        $sio = Bio::SeqIO->new(-fh => $zcat, -format => "Fastq")
+    }
+    else {
+	    $sio = Bio::SeqIO->new(-file => $f, -format => $t);
+    }
 	my $s = $sio->next_seq() or croak "Something went bad while reading file $f!\n";
 	return $s->length;
 }
