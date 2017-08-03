@@ -2,7 +2,7 @@
 #
 #       VelvetOptimiser.pl
 #
-#       Copyright 2008, 2009, 2010 Simon Gladman <simon.gladman@monash.edu>
+#       Copyright 2008, 2009, 2010 Simon Gladman <simon.gladman@unimelb.edu.au>
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
