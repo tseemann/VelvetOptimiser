@@ -7,6 +7,9 @@ authors:
  - name: Simon Gladman
    orcid: 0000-0002-6100-4385
    affiliation: Melbourne Bioinformatics, University of Melbourne
+-  name: Andrew J Page
+   orcid: 0000-0001-6919-6062
+   affiliation: Pathogen Informatics, Wellcome Trust Sanger Institute
  - name: Torsten Seemann
    orcid: 0000-0001-6046-610X
    affiliation: Melbourne Bioinformatics, University of Melbourne
