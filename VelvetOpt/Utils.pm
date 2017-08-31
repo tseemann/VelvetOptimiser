@@ -73,10 +73,8 @@ sub num_cpu {
 
 sub free_mem {
 	if( $^O =~ m/linux/i ) {
-		my $x       = `free | grep '^Mem:' | sed 's/  */~/g' | cut -d '~' -f 4,7`;
-		my @tmp     = split "~", $x;
-		my $total   = $tmp[0] + $tmp[1];
-		my $totalGB = $total / 1024 / 1024;
+		my $avail   = `free | grep '^Mem:' | sed 's/  */~/g' | cut -d '~' -f 7`;
+		my $totalGB = $avail / 1024 / 1024;
 		return $totalGB;
 	}
 	elsif( $^O =~ m/darwin/i){
