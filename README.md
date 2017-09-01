@@ -12,22 +12,22 @@
 - [Command Line](#command-line)
 - [Examples](#examples)
 - [Detailed Options](#detailed-options)
-	- [``` -h or --help```](#-h-or-help)
-	- [```-V or --version```](#-v-or-version)
-	- [```-v or --verbose```](#-v-or-verbose)
-	- [```-s or --hashs```](#-s-or-hashs)
-	- [```-e or --hashe```](#-e-or-hashe)
-	- [`-x or --step`](#-x-or-step)
-	- [`-f or --velvethfiles`](#-f-or-velvethfiles)
-	- [`-a or --amosfile`](#-a-or-amosfile)
-	- [`-o or --velvetgoptions`](#-o-or-velvetgoptions)
-	- [`-t or --threads`](#-t-or-threads)
-	- [`-g or --genomesize`](#-g-or-genomesize)
-	- [`-k or --optFuncKmer`](#-k-or-optfunckmer)
-	- [`-c or --optFuncCov`](#-c-or-optfunccov)
-	- [`-p or --prefix`](#-p-or-prefix)
-	- [`-d or --dir_final`](#-d-or-dirfinal)
-	- [`-z or --upperCovCutoff`](#-z-or-uppercovcutoff)
+	- [``` -h or --help```](#-h-or---help)
+	- [```-V or --version```](#-v-or---version)
+	- [```-v or --verbose```](#-v-or---verbose)
+	- [```-s or --hashs```](#-s-or---hashs)
+	- [```-e or --hashe```](#-e-or---hashe)
+	- [`-x or --step`](#-x-or---step)
+	- [`-f or --velvethfiles`](#-f-or---velvethfiles)
+	- [`-a or --amosfile`](#-a-or---amosfile)
+	- [`-o or --velvetgoptions`](#-o-or---velvetgoptions)
+	- [`-t or --threads`](#-t-or---threads)
+	- [`-g or --genomesize`](#-g-or---genomesize)
+	- [`-k or --optFuncKmer`](#-k-or---optfunckmer)
+	- [`-c or --optFuncCov`](#-c-or---optfunccov)
+	- [`-p or --prefix`](#-p-or---prefix)
+	- [`-d or --dir_final`](#-d-or---dirfinal)
+	- [`-z or --upperCovCutoff`](#-z-or---uppercovcutoff)
 - [Bugs](#bugs)
 - [To do](#to-do)
 - [Contact](#contact)
@@ -139,7 +139,7 @@ VelvetOptimiser.pl \[options\] -f 'velveth input line'
 
 ```
 
-**Advanced!**: VelvetOptimiser accepts custom optimisation functions. See [here](#-c-or-optfunccov).
+**Advanced!**: VelvetOptimiser accepts custom optimisation functions. See [here](#-c-or---optfunccov).
 
 
 ## Examples
@@ -199,7 +199,7 @@ If the supplied value is higher than `MAXKMERLENGTH`, it will be dropped to `MAX
 
 Parameter type required: odd integer >= `hashs` & <= the `MAXKMERLENGTH` velvet was compiled with.
 
-*   Default: MAXKMERLENGTH
+*   Default: `MAXKMERLENGTH`
 
 This is the upper end of the hash value range that the optimiser will search for the optimum.
 
@@ -264,6 +264,9 @@ Examples:
 
 *   `-f '-shortPaired paired_reads_1.fna -shortPaired2 paired_reads_2.fna'`
     -   Two read files supplied, both are short paired fastas but come from two different libraries, therefore needing two different CATEGORIES.
+	
+*	`-f '-shortPaired -fastq.gz -separate reads_R1.fastq.gz reads_R2.fastq.gz'`
+	-	Separate files for forward and reverse reads of a paired end library are specified with the `-separate` tag. 
 
 There is a fairly extensive checker built into the optimiser to check if the format of the string is correct.  However, it won't check the read files for their format (`fasta`, `fastq`, `eland` etc.)
 
@@ -271,7 +274,7 @@ There is a fairly extensive checker built into the optimiser to check if the for
 
 Turns on Velvet\'s read tracking and `amos` file output.
 
-This option is the same as specifying '-amos_file yes -read_trkg yes' in velvetg.  However, it will only be added to the final assembly and not to the intermediate ones.
+This option is the same as specifying `-amos_file yes -read_trkg yes` in velvetg.  However, it will only be added to the final assembly and not to the intermediate ones.
 
 ### `-o or --velvetgoptions`
 
@@ -345,7 +348,7 @@ Names the `logfile` and the output directory with whatever prefix is supplied fo
 
 Parameter type required: `string`
 
-Default: . (the current directory)
+Default: `.` (the current directory)
 
 At the completion of the optimiser, any non default string will cause the final velvet output and the Velvet Optimiser `logfile` to be moved to the directory specified. If the directory already exists, an error is generated and the optimiser stops.
 
@@ -363,7 +366,7 @@ Uses this fraction of the expected coverage to set the upper limit of the covera
 
 ## To do
 
-*   Make the auto_XXX folders be in --dir_final when set, not in the current directory.
+*   Make the auto_XXX folders be in `--dir_final` when set, not in the current directory.
 *   Use velvetk.pl script to choose suitable -s and -e parameters.
 
 ## Contact
