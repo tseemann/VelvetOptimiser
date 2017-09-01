@@ -431,7 +431,7 @@ sub setOptions {
 		{OPT=>"a|amosfile!", VAR=>\$amos, DEFAULT=>0, DESC=>"Turn on velvet's read tracking and amos file output."},
 		{OPT=>"o|velvetgoptions=s", VAR=>\$vgoptions, DEFAULT=>'', DESC=>"Extra velvetg options to pass through.  eg. -long_mult_cutoff -max_coverage etc"},
 		{OPT=>"t|threads=i", VAR=>\$num_threads, DEFAULT=>$thmax, DESC=>"The maximum number of simulataneous velvet instances to run."},
-		{OPT=>"g|genomesize=f", VAR=>\$genomesize, DEFAULT=>0, DESC=>"The approximate size of the genome to be assembled in megabases.\n\t\t\tOnly used in memory use estimation. If not specified, memory use estimation\n\t\t\twill not occur. If memory use is estimated, the results are shown and then program exits."},
+		{OPT=>"g|genomesize=f", VAR=>\$genomesize, DEFAULT=>0, DESC=>"The approximate size of the genome to be assembled in megabases.\n\t\t\t\t\tOnly used in memory use estimation. If not specified, memory use estimation will not occur.\n\t\t\t\t\tIf memory use is estimated, the results are shown and then program exits."},
 		{OPT=>"k|optFuncKmer=s", VAR=>\$opt_func, DEFAULT=>'n50', DESC=>"The optimisation function used for k-mer choice."},
 		{OPT=>"c|optFuncCov=s", VAR=>\$opt_func2, DEFAULT=>'Lbp', DESC=>"The optimisation function used for cov_cutoff optimisation."},
         {OPT=>"m|minCovCutoff=f", VAR=>\$minCovCutoff, DEFAULT=>0, DESC=>"The minimum cov_cutoff to be used."},
@@ -440,9 +440,9 @@ sub setOptions {
 		{OPT=>"z|upperCovCutoff=f", VAR=>\$upperCovCutoff, DEFAULT=>0.8, DESC=>"The maximum coverage cutoff to consider as a multiplier of the expected coverage."},
 	);
 
-	(@ARGV < 1) && (usage());
+	(@ARGV < 1) && (usage(1));
 
-	&GetOptions(map {$_->{OPT}, $_->{VAR}} @Options) || usage();
+	&GetOptions(map {$_->{OPT}, $_->{VAR}} @Options) || usage(1);
 
 	# Now setup default values.
 	foreach (@Options) {
@@ -460,7 +460,7 @@ sub setOptions {
 
 	unless($readfile){
 		print STDERR "\tYou must supply the velveth parameter line in quotes. eg -f '-short .....'\n";
-		&usage();
+		&usage(1);
 	}
 
     if($hashs > $maxhash){
@@ -520,14 +520,29 @@ sub setOptions {
 }
 
 sub usage {
+    my $ec = shift;
+    if ($ec eq "help"){
+        select STDOUT;
+        $ec = 0;
+    }
+    else {
+        select STDERR;
+    }
+    
 	print "Usage: $0 [options] -f 'velveth input line'\n";
 	foreach (@Options) {
-		printf "  --%-13s %s%s.\n",$_->{OPT},$_->{DESC},
+        my $opt = $_->{OPT};
+        $opt =~ s/!$//;
+        $opt =~ s/=s$/ [X]/;
+        $opt =~ s/=i$/ [N]/;
+        $opt =~ s/=f$/ [n.n]/;
+        my $opt_string = sprintf "\t--%-23s %s%s.\n",$opt,$_->{DESC},
 			defined($_->{DEFAULT}) ? " (default '$_->{DEFAULT}')" : "";
+        print $opt_string;
 	}
 	print "\nAdvanced!: Changing the optimisation function(s)\n";
 	print VelvetOpt::Assembly::opt_func_toString;
-	exit(1);
+    exit($ec);
 }
 
 #----------------------------------------------------------------------
