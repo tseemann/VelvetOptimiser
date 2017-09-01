@@ -529,7 +529,8 @@ sub usage {
         select STDERR;
     }
     
-	print "Usage: $0 [options] -f 'velveth input line'\n";
+    my (undef,undef,$EXE) = File::Spec->splitpath($0);
+	print "Usage: $EXE [options] -f 'velveth input line'\n";
 	foreach (@Options) {
         my $opt = $_->{OPT};
         $opt =~ s/!$//;
