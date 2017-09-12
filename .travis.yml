@@ -11,7 +11,7 @@ addons:
             - velvet
 
 install:
-    - "cpanm --quiet --notest Bio::Perl"
+    - "cpanm --quiet --notest Bio::Perl threads::shared"
     - "export PATH=$PWD:$PATH"
 
 script:
