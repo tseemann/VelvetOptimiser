@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tseemann/VelvetOptimiser.svg?branch=master)](https://travis-ci.org/tseemann/VelvetOptimiser)
+
 # VelvetOptimiser: automate your Velvet assemblies
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
