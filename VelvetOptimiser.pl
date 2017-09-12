@@ -19,7 +19,7 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 
-my $OptVersion = "2.2.6";
+my $OptVersion = "2.3.0-alpha";
 
 #
 #   pragmas
