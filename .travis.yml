@@ -2,8 +2,8 @@ language: perl
 
 sudo: false
 
-perl:
-    - "5.18.1-thr"
+#perl:
+#    - "5.18.1-thr"
     
 addons:
     apt:
