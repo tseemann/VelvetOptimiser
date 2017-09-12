@@ -1,0 +1,21 @@
+language: perl
+
+sudo: false
+
+perl:
+    - "5.14"
+    
+addons:
+    apt:
+        packages:
+            - velvet
+
+install:
+    - "cpanm --quiet --notests Bio::Perl threads::shared"
+    - "export PATH=$PWD:$PATH"
+
+script:
+    - "VelvetOptimiser --help"
+    - "VelvetOptimiser --version"
+    - "! VelvetOptimiser --awesomeness"
+    - "test/run_test.sh"
