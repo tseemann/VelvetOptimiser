@@ -2,13 +2,14 @@ language: perl
 
 sudo: false
 
-#perl:
-#    - "5.18.1-thr"
+perl:
+    - "5.18-shrplib"
     
 addons:
     apt:
         packages:
             - velvet
+            - velvet-example
 
 install:
     - "cpanm --quiet --notest Bio::Perl"
