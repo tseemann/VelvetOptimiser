@@ -5,17 +5,15 @@ sudo: false
 # for threads - https://docs.travis-ci.com/user/languages/perl/
 perl:
     - "5.18-shrplib"
-    
-addons:
-    apt:
-        packages:
-            - velvet
-            - velvet-example
 
+# velvet default KMER is too small    
 install:
-    - "cpanm --quiet --notest Bio::Perl"
-    - "export PATH=$PWD:$PATH"
+    - "wget https://www.ebi.ac.uk/~zerbino/velvet/velvet_1.2.10.tgz"
+    - "tar zxf velvet_1.2.10.tgz"
+    - "make -C velvet_1.2.10 MAXKMERLENGTH=127 OPENMP=1 CATEGORIES=2"
+    - "export PATH=$PWD:$PWD/velvet_1.2.10:$PATH"
     - "export OMP_NUM_THREADS=4"
+    - "cpanm --quiet --notest Bio::Perl"
 
 script:
     - "VelvetOptimiser.pl --help"
