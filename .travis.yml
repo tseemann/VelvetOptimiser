@@ -15,7 +15,7 @@ install:
     - "export PATH=$PWD:$PATH"
 
 script:
-    - "VelvetOptimiser --help"
-    - "VelvetOptimiser --version"
-    - "! VelvetOptimiser --awesomeness"
+    - "VelvetOptimiser.pl --help"
+    - "VelvetOptimiser.pl --version"
+    - "! VelvetOptimiser.pl --awesomeness"
     - "test/run_test.sh"
