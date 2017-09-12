@@ -17,8 +17,14 @@ install:
     - "export PATH=$PWD:$PATH"
     - "export OMP_NUM_THREADS=4"
 
+before_script:
+    - "velveth | grep 'MAXKMERLENGTH = 127'"
+    - "velveth | grep 'OPENMP'"
+    - "export TD=test/data/test_"
+
 script:
     - "VelvetOptimiser.pl --help"
     - "VelvetOptimiser.pl --version"
     - "! VelvetOptimiser.pl --awesomeness"
-    - "cd test && ./run_test.sh"
+    - "VelvetOptimiser.pl -d out1 -s 55 -e 59 -f '-shortPaired -fastq.gz -separate ${TD}_short_R1.fq.gz ${TD}_short_R2.fq.gz' "
+    - "grep -c '>NODE' out1/contigs.fa"
