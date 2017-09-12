@@ -3,7 +3,7 @@ language: perl
 sudo: false
 
 perl:
-    - "5.14-thr"
+    - "5.18.1-thr"
     
 addons:
     apt:
@@ -13,6 +13,7 @@ addons:
 install:
     - "cpanm --quiet --notest Bio::Perl"
     - "export PATH=$PWD:$PATH"
+    - "export OMP_NUM_THREADS=4"
 
 script:
     - "VelvetOptimiser.pl --help"
