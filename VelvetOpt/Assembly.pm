@@ -325,7 +325,7 @@ sub calcAssemblyScore {
 	my $r = $cpt->reval($func);
 	warn $@ if $@;
 	$self->{assmscore} = $r;
-	unless($r =~ /^\d+/){ 
+	unless($r =~ /^[-+]?\d+/){ 
 		warn "Optimisation function did not return a single float.\nOptimisation function was not evaluatable.\nOptfunc: $func";
 		warn "Setting assembly score to 0\n"; 
 		$self->{assmscore} = 0;
