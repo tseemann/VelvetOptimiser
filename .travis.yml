@@ -3,7 +3,7 @@ language: perl
 sudo: false
 
 perl:
-    - "5.14"
+    - "5.22.0-thr"
     
 addons:
     apt:
@@ -11,7 +11,7 @@ addons:
             - velvet
 
 install:
-    - "cpanm --quiet --notest Bio::Perl threads::shared"
+    - "cpanm --quiet --notest Bio::Perl"
     - "export PATH=$PWD:$PATH"
 
 script:
