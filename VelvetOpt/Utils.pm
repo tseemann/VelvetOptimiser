@@ -53,18 +53,21 @@ use Bio::SeqIO;
 #	Written by Torsten Seemann 2009 (linux) and Mikael Brandstrom Durling 2009 (Mac).
 
 sub num_cpu {
-    if ( $^O =~ m/linux/i ) {
-        my ($num) = qx(grep -c ^processor /proc/cpuinfo);
-        chomp $num;
-        return $num if $num =~ m/^\d+/;
-    }
-	elsif( $^O =~ m/darwin/i){
-		my ($num) = qx(system_profiler SPHardwareDataType | grep Cores);
-		$num =~ /.*Cores: (\d+)/;
-		$num =$1;
-		return $num;
-	}
-    return 1;
+    my($num)= qx(getconf _NPROCESSORS_ONLN); # POSIX
+    chomp $num;
+    return $num || 1;
+    # if ( $^O =~ m/linux/i ) {
+    #     my ($num) = qx(grep -c ^processor /proc/cpuinfo);
+    #     chomp $num;
+    #     return $num if $num =~ m/^\d+/;
+    # }
+	# elsif( $^O =~ m/darwin/i){
+	# 	my ($num) = qx(system_profiler SPHardwareDataType | grep Cores);
+	# 	$num =~ /.*Cores: (\d+)/;
+	# 	$num =$1;
+	# 	return $num;
+	# }
+    # return 1;
 }
 
 #	free_mem
