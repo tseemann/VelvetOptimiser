@@ -149,7 +149,7 @@ print STDERR "Velvet details:\n";
 print STDERR "\tVelvet version: $vhversion\n";
 print STDERR "\tCompiled categories: $categories\n" if $categories;
 print STDERR "\tCompiled max kmer length: $maxhash\n" if $maxhash;
-print STDERR "\tMaximum number of velvetinstances to run: $num_threads\n";
+print STDERR "\tMaximum number of Velvet instances to run: $num_threads\n";
 
 #let user know about parameters to run with.
 print STDERR "Will run velvet optimiser with the following paramters:\n";
