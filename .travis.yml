@@ -18,7 +18,7 @@ install:
 before_script:
     - "velveth | grep 'MAXKMERLENGTH = 127'"
     - "velveth | grep 'OPENMP'"
-    - "export TD=test/data/test_"
+    - "export TD=test/data/test"
 
 script:
     - "VelvetOptimiser.pl --help"
