@@ -3,7 +3,7 @@ language: perl
 sudo: false
 
 perl:
-    - "5.22.0-thr"
+    - "5.14-thr"
     
 addons:
     apt:
