@@ -42,6 +42,7 @@ use Data::Dumper;
 use Storable qw (freeze thaw);
 use Getopt::Long;
 use File::Path qw (remove_tree);
+use File::Copy qw (move);
 
 
 #
@@ -401,8 +402,8 @@ foreach my $key(keys %assemblies){
 	}
 }
 unless ($finaldir eq "."){
-	rename $assembliesObjs{$bestId}->{ass_dir}, $finaldir;
-	rename $logfile, "$finaldir/$logfile";
+	move($assembliesObjs{$bestId}->{ass_dir}, $finaldir);
+	move($logfile, "$finaldir/$logfile");
 }
 
 #
@@ -528,7 +529,7 @@ sub usage {
     else {
         select STDERR;
     }
-    
+
     my (undef,undef,$EXE) = File::Spec->splitpath($0);
 	print "Usage: $EXE [options] -f 'velveth input line'\n";
 	foreach (@Options) {
