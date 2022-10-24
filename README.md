@@ -81,10 +81,10 @@ conda install -c bioconda perl-velvetoptimiser
 
 ```
 # Step 1
-wget -O velvetoptimiser_2.2.6.tar.gz https://github.com/tseemann/VelvetOptimiser/releases/tag/2.2.6
+wget -O velvetoptimiser_2.2.6.tar.gz https://github.com/tseemann/VelvetOptimiser/archive/refs/tags/2.2.6.tar.gz
 
 # Step 2
-mkdir $HOME/src && mv velvetoptimiser_2.2.6.tar.gz  $HOME/src && tar zxvf velvetoptimiser_2.2.6.tar.gz
+mkdir $HOME/src && mv velvetoptimiser_2.2.6.tar.gz $HOME/src && cd $HOME/src && tar zxvf velvetoptimiser_2.2.6.tar.gz
 
 # Step 3
 echo "export PATH=$PATH:$HOME/src/velvetoptimiser_2.2.6"
